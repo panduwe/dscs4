@@ -1,0 +1,163 @@
+var express = require('express'),
+    jwt     = require('express-jwt'),
+    config  = require('../config'),
+    db      = require('../db');
+    db      = require('../db2');
+    db      = require('../db3');
+
+var app = module.exports = express.Router();
+
+var jwtCheck = jwt({
+  secret: config.secretKey
+});
+
+
+function getSidangKpDB(done){
+  var date = new Date();
+  var tahun = date.getFullYear();
+  var bulan = date.getMonth()-1;
+  if(bulan<10){
+      bulan='0'+bulan;
+  }
+    db.get().query(`select mhsNiu, mhsNama, mhsEmail, prodiNamaResmi, judul_kp, tgl, tgl_sidang, waktu_sidang, ruangan
+                    from uinsgd_gtakademik.mahasiswa
+                    JOIN uinsgd_gtakademik.program_studi ON mhsProdiKode=prodiKode
+                    JOIN pendafta_db.kp ON nim=mhsNiu
+                    where YEAR(tgl)= ${tahun} AND MONTH(tgl)=${bulan}`, function(err, rows) {
+        if (err) throw err;
+        let row = rows[0];
+        if(!row){
+         done(`data pada bulan = ${bulan} - ${tahun} not found..`)
+       }else{
+         done(rows);
+       }
+    });
+}
+
+function getSidangKompreDB(done){
+  var date = new Date();
+  var tahun = date.getFullYear();
+  var bulan = date.getMonth();
+  if(bulan<10){
+      bulan='0'+bulan;
+  }
+    db.get().query(`select mhsNiu, mhsNama, mhsEmail, prodiNamaResmi, tgl, tgl_sidang, waktu_sidang, ruangan, penguji_1, penguji_2, penguji_3
+                    from uinsgd_gtakademik.mahasiswa
+                    JOIN uinsgd_gtakademik.program_studi ON mhsProdiKode=prodiKode
+                    JOIN pendafta_db.kompre ON nim=mhsNiu
+                    where YEAR(tgl)= ${tahun} AND MONTH(tgl)=${bulan}`, function(err, rows) {
+        if (err) throw err;
+        let row = rows[0];
+        if(!row){
+         done(`data pada bulan = ${bulan} - ${tahun} not found..`)
+       }else{
+         done(rows);
+       }
+    });
+}
+
+function getSidangJudulDB(done){
+  var date = new Date();
+  var tahun = date.getFullYear();
+  var bulan = date.getMonth()-1;
+  if(bulan<10){
+      bulan='0'+bulan;
+  }
+    db.get().query(`select mhsNiu, mhsNama, mhsEmail, prodiNamaResmi, judul_proposal, tgl, tgl_sidang, waktu_sidang, ruangan, penguji
+                    from uinsgd_gtakademik.mahasiswa
+                    JOIN uinsgd_gtakademik.program_studi ON mhsProdiKode=prodiKode
+                    JOIN pendafta_db.proposal ON nim=mhsNiu
+                    where YEAR(tgl)= ${tahun} AND MONTH(tgl)=${bulan}`, function(err, rows) {
+        if (err) throw err;
+        let row = rows[0];
+        if(!row){
+         done(`data pada bulan = ${bulan} - ${tahun} not found..`)
+       }else{
+         done(rows);
+       }
+    });
+}
+
+function getSidangKoloDB(done){
+  var date = new Date();
+  var tahun = date.getFullYear();
+  var bulan = date.getMonth();
+  if(bulan<10){
+      bulan='0'+bulan;
+  }
+    db.get().query(`select mhsNiu, mhsNama, mhsEmail, prodiNamaResmi, judul_skripsi, tgl, tgl_sidang, waktu_sidang, ruangan,
+                    penguji_1, penguji_2, pembimbing_1, pembimbing_2
+                    from uinsgd_gtakademik.mahasiswa
+                    JOIN uinsgd_gtakademik.program_studi ON mhsProdiKode=prodiKode
+                    JOIN pendafta_db.kolokium ON nim=mhsNiu
+                    where YEAR(tgl)= ${tahun} AND MONTH(tgl)=${bulan}`, function(err, rows) {
+        if (err) throw err;
+        let row = rows[0];
+        if(!row){
+         done(`data pada bulan = ${bulan} - ${tahun} not found..`)
+       }else{
+         done(rows);
+       }
+    });
+}
+
+function getSidangMunaDB(done){
+  var date = new Date();
+  var tahun = date.getFullYear();
+  var bulan = date.getMonth()-1;
+  if(bulan<10){
+      bulan='0'+bulan;
+  }
+    db.get().query(`select mhsNiu, mhsNama, mhsEmail, prodiNamaResmi, judul_skripsi, tgl, tgl_sidang, waktu_sidang, ruangan,
+                    penguji_1, penguji_2, pembimbing_1, pembimbing_2
+                    from uinsgd_gtakademik.mahasiswa
+                    JOIN uinsgd_gtakademik.program_studi ON mhsProdiKode=prodiKode
+                    JOIN pendafta_db.muna ON nim=mhsNiu
+                    where YEAR(tgl)= ${tahun} AND MONTH(tgl)=${bulan}`, function(err, rows) {
+        if (err) throw err;
+        let row = rows[0];
+        if(!row){
+         done(`data pada bulan = ${bulan} - ${tahun} not found..`)
+       }else{
+         done(rows);
+       }
+    });
+}
+
+
+//===============================================================================
+
+//app.use('/api/sidang/kp', jwtCheck);
+app.get('/api/sidang/kp', function(req, res) {
+  getSidangKpDB(function(result) {
+      res.status(200).send(result);
+  });
+});
+
+//app.use('/api/sidang/kompre', jwtCheck);
+app.get('/api/sidang/kompre', function(req, res) {
+  getSidangKompreDB(function(result) {
+      res.status(200).send(result);
+  });
+});
+
+//app.use('/api/sidang/judul', jwtCheck);
+app.get('/api/sidang/judul', function(req, res) {
+  getSidangJudulDB(function(result) {
+      res.status(200).send(result);
+  });
+});
+
+//app.use('/api/sidang/kolo', jwtCheck);
+app.get('/api/sidang/kolo', function(req, res) {
+  getSidangKoloDB(function(result) {
+      res.status(200).send(result);
+  });
+});
+
+//app.use('/api/sidang/kolo', jwtCheck);
+app.get('/api/sidang/muna', function(req, res) {
+  getSidangMunaDB(function(result) {
+      res.status(200).send(result);
+  });
+});
